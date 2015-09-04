@@ -1,5 +1,6 @@
 bin/
 gen/
 obj/
-libs/
-jni/arm/
+libs/*/*.so
+libs/*/gdb.setup
+libs/*/gdbserver
