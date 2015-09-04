@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="wrap_content"
+	android:layout_width="match_parent"
+	android:orientation="vertical">
+
+	<SeekBar
+		android:layout_height="wrap_content"
+		android:layout_width="match_parent"
+		android:id="@+id/seek"/>
+
+	<LinearLayout
+		android:layout_height="wrap_content"
+		android:layout_width="match_parent"
+		android:orientation="horizontal">
+
+		<TextView
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:id="@+id/curtime"/>
+
+		<TextView
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:layout_weight="1.0"/>
+
+		<TextView
+			android:layout_height="wrap_content"
+			android:layout_width="wrap_content"
+			android:id="@+id/totaltime"/>
+
+	</LinearLayout>
+
+	<LinearLayout
+		android:layout_height="wrap_content"
+		android:layout_width="match_parent"
+		android:orientation="horizontal">
+
+		<ImageButton
+			android:layout_height="wrap_content"
+			android:layout_width="match_parent"
+			android:onClick="click"
+			android:src="@android:drawable/ic_media_previous"
+			android:layout_weight="1.0"
+			android:id="@+id/previous"/>
+
+		<ImageButton
+			android:onClick="click"
+			android:layout_height="wrap_content"
+			android:layout_width="match_parent"
+			android:src="@android:drawable/ic_media_play"
+			android:layout_weight="1.0"
+			android:id="@+id/play"/>
+
+		<ImageButton
+			android:onClick="click"
+			android:layout_height="wrap_content"
+			android:layout_width="match_parent"
+			android:src="@android:drawable/ic_media_pause"
+			android:layout_weight="1.0"
+			android:id="@+id/pause"/>
+
+		<ImageButton
+			android:onClick="click"
+			android:layout_height="wrap_content"
+			android:layout_width="match_parent"
+			android:src="@android:drawable/ic_media_next"
+			android:layout_weight="1.0"
+			android:id="@+id/next"/>
+
+	</LinearLayout>
+
+</LinearLayout>
+

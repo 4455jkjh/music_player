@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="@android:style/Theme.Material.Light">
+		<item name="android:colorPrimary">@color/blue</item>
+        <item name="android:colorPrimaryDark">@color/blue1</item>
+        <item name="android:colorAccent">@color/blue2</item>
+	</style>
+</resources>

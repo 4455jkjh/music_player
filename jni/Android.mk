@@ -16,7 +16,13 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE    := hello-jni
-LOCAL_SRC_FILES := hello-jni.c
+LOCAL_MODULE    := audio
+LOCAL_SRC_FILES := $(TARGET_ARCH)/lib$(LOCAL_MODULE).so
 
-include $(BUILD_SHARED_LIBRARY)
+include $(PREBUILT_SHARED_LIBRARY)
+include $(CLEAR_VARS)
+
+LOCAL_MODULE    := ffmpeg
+LOCAL_SRC_FILES := $(TARGET_ARCH)/lib$(LOCAL_MODULE).so
+
+include $(PREBUILT_SHARED_LIBRARY)
