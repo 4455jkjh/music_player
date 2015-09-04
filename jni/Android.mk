@@ -1,4 +1,4 @@
-# Copyright (C) 2009 The Android Open Source Project
+# Copyright (C) 2010 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,12 +17,15 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := audio
-LOCAL_SRC_FILES := $(TARGET_ARCH)/lib$(LOCAL_MODULE).so
+LOCAL_SRC_FILES := native-audio-jni.c ffmpeg.c onload.c
+LOCAL_ARM_MODE := arm
+# for native audio
+LOCAL_LDLIBS    += -lOpenSLES -llog
+LOCAL_SHARED_LIBRARIES := ffmpeg
+include $(BUILD_SHARED_LIBRARY)
 
-include $(PREBUILT_SHARED_LIBRARY)
+
 include $(CLEAR_VARS)
-   
 LOCAL_MODULE    := ffmpeg
-LOCAL_SRC_FILES := $(TARGET_ARCH)/lib$(LOCAL_MODULE).so
-
+LOCAL_SRC_FILES := $(TARGET_ARCH)/libffmpeg.so
 include $(PREBUILT_SHARED_LIBRARY)
