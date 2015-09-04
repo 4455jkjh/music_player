@@ -2,4 +2,4 @@ bin/
 gen/
 obj/
 libs/
-jni/
+jni/arm/
