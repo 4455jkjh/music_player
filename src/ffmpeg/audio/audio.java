@@ -15,6 +15,7 @@ public class audio
 	public native void pause();
 	public native long getcur();
 	public native long gettotal();
+	public native String getinfo(String s);
 	public void callback(int i){
 		if(h!=null)
 			h.sendEmptyMessage(i);

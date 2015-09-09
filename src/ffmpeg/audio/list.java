@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Comparator;
 import java.text.Collator;
 import java.util.Locale;
+import android.app.AlertDialog;
+import android.widget.Button;
 
 public class list extends Activity implements Runnable,AdapterView.OnItemClickListener
 {
@@ -182,6 +184,14 @@ public class list extends Activity implements Runnable,AdapterView.OnItemClickLi
 		index = p3;
 		play();
 	}
+	private void play(File f){
+		a.release();
+		a.setData(f.getAbsolutePath());
+		totaltime.setText(gettime(a.gettotal()));
+		seek.setMax((int)a.gettotal());
+		a.play();
+		setTitle(f.getName());
+	}
 	private void play()
 	{
 		File f=lf.get(index);
@@ -220,7 +230,7 @@ public class list extends Activity implements Runnable,AdapterView.OnItemClickLi
 		}
 	}
 
-	private class Adapter extends BaseAdapter
+	private class Adapter extends BaseAdapter 
 	{
 		TextView size,time;
 		@Override
@@ -247,11 +257,32 @@ public class list extends Activity implements Runnable,AdapterView.OnItemClickLi
 		{
 			// TODO: Implement this method
 			File f=lf.get(p1);
+			click c=new click(f);
 			p2 = getLayoutInflater().inflate(R.layout.adapter, p3, false);
-			((TextView)p2.findViewById(R.id.name)).setText(f.getName());
-			size = (TextView)p2.findViewById(R.id.size);
-			size.setText(size(f.length(), 0));
+			TextView tv=(TextView)p2.findViewById(R.id.name);
+			tv.setText(f.getName());
+			tv.setOnClickListener(c);
+			((Button)p2.findViewById(R.id.info)).setOnClickListener(c);
+			/*size = (TextView)p2.findViewById(R.id.size);
+			size.setText(size(f.length(), 0));*/
 			return p2;
+		}
+	}
+	class click implements View.OnClickListener
+	{
+		File s;
+		public click(File s){
+			this.s=s;
+		}
+		@Override
+		public void onClick(View p1)
+		{
+			// TODO: Implement this method
+			if(p1 instanceof Button){
+				showinfo(s);
+			}else if(p1 instanceof TextView){
+				play(s);
+			}
 		}
 	}
 	String dw[]={
@@ -261,6 +292,12 @@ public class list extends Activity implements Runnable,AdapterView.OnItemClickLi
 		"GB",
 		"TB",
 	};
+	public void showinfo(File s){
+		AlertDialog.Builder ab=new AlertDialog.Builder(this);
+		ab.setTitle(s.getName())
+		.setMessage(s.getAbsolutePath());
+		ab.create().show();
+	}
 	private String size(double a, int b)
 	{
 		if (a < 1024)

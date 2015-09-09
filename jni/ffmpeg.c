@@ -155,3 +155,27 @@ jlong Java_ffmpeg_audio_audio_gettotal(JNIEnv *env,jclass clz)
 	uint64_t t=duration*av_q2d(ran);
 	return t;
 }
+char info1[1000];
+static void loggg(void *a,int b,const char *c,va_list d){
+	vsprintf(info1,c,d);
+}
+jstring Java_ffmpeg_audio_audio_getinfo(JNIEnv *env,jclass clz,jstring name){
+	LOGI("%s","getinfo");
+	AVFormatContext *format;
+	//AVCodecContext *codec;
+	av_log_set_callback(loggg);
+	const char *file=(*env)->GetStringUTFChars(env,name,0);
+	if(avformat_open_input(&format,file,NULL,NULL)!=0)
+		goto end;
+	if(avformat_find_stream_info(format,NULL)<0)
+		goto end;
+	av_dump_format(pFormatCtx,-1,file,0);
+	int i;
+	for(i=0;i<format->nb_streams;i++){
+		
+	}
+	    avformat_close_input(&format); 
+	(*env)->ReleaseStringUTFChars(env,name,file);
+end:
+	return 	(*env)->NewStringUTF(env,info1);
+}
