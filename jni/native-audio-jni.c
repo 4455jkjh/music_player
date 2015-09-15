@@ -83,8 +83,6 @@ void set_play_callback(void (*callback)()){
 // this callback handler is called every time a buffer finishes playing
 void bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context)
 {
-    assert(bq == bqPlayerBufferQueue);
-    assert(NULL == context);
     play_callback();
 }
 void AudioWrite(void *data,int size){

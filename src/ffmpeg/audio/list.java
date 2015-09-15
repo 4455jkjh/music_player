@@ -173,7 +173,6 @@ public class list extends Activity implements Runnable,AdapterView.OnItemClickLi
 		".aac",
 		".wav",
 		".wma",
-		".asf",
 	};
 
 	@Override
@@ -320,7 +319,7 @@ public class list extends Activity implements Runnable,AdapterView.OnItemClickLi
 			else if (msg.what == 1)
 			{
 				index++;
-				if (index == lf.size())index = 0;
+				if (index == lf.size())return;
 				play();
 			}
 			else if (msg.what == 2)

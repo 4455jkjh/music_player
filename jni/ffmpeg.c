@@ -7,6 +7,10 @@
 #include "onload.h"
 #define MAX_AUDIO_FRAME_SIZE 192000 // 1 second of 48khz 32bit audio
 #define 	out_sample_fmt AV_SAMPLE_FMT_S16
+#define VLOGI(a,b) ((void)__android_log_vprint(ANDROID_LOG_INFO, "ffmpegaudio", a,b)) 
+#define VLOGD(a,b) ((void)__android_log_vprint(ANDROID_LOG_DEBUG, "ffmpegaudio", a,b)) 
+#define VLOGW(a,b) ((void)__android_log_vprint(ANDROID_LOG_WARN, "ffmpegaudio", a,b)) 
+#define VLOGE(a,b) ((void)__android_log_vprint(ANDROID_LOG_ERROR, "ffmpegaudio", a,b)) 
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "ffmpegaudio", __VA_ARGS__)) 
 AVFormatContext *pFormatCtx;
 AVCodecContext *pCodecCtx;
@@ -25,49 +29,72 @@ int i;
 int pause;
 int ii;
 AVRational ran;
+int tni;
+int ret1;
+void read(){
+	av_free_packet(packet);
+	av_read_frame(pFormatCtx,packet);
+	LOGI("ret:%d",ret);
+}
 void play(){
 	if(pause==1){
-		r=0;
 		return;
 	}
 	if(packet->size==0){
-		av_free_packet(packet);
-		ret=av_read_frame(pFormatCtx,packet);
+		read();
 	}
 	if(packet->stream_index==audioIndex){
-		ret=avcodec_decode_audio4(pCodecCtx,pFrame,&finish,packet);
+		ret1=avcodec_decode_audio4(pCodecCtx,pFrame,&finish,packet);
 		if(finish){
-			if (i==1){
-    			r=swr_convert(au_convert_ctx,&out_buffer, MAX_AUDIO_FRAME_SIZE,(const uint8_t **)pFrame->data , pFrame->nb_samples);
-    			out_buffer_size=av_samples_get_buffer_size(NULL,out_channels ,r,out_sample_fmt, 1);
-    		}else{
-    			out_buffer_size = av_samples_get_buffer_size(pFrame->linesize,pCodecCtx->channels,pFrame->nb_samples,pCodecCtx->sample_fmt, 1);
-    			out_buffer=pFrame->data[0];
-    		}
+    		r=swr_convert(au_convert_ctx,&out_buffer, MAX_AUDIO_FRAME_SIZE,(const uint8_t **)pFrame->data , pFrame->nb_samples);
+    		out_buffer_size=av_samples_get_buffer_size(NULL,out_channels ,r,out_sample_fmt, 1);
 			AudioWrite(out_buffer,out_buffer_size);
-			//LOGI("index:%d\taudio:%d\t buffer size:%d\t packet size:%d\t ret:%d\t channel:%d",ii,audioIndex,out_buffer_size,packet->size,ret,pCodecCtx->channels);
-			packet->data+=ret;
-			packet->size-=ret;
+			//av_log(NULL,AV_LOG_INFO,"tni:%d packet size:%6d ret:%6d",tni,packet->size,ret);
+			tni++;
+			packet->size-=ret1;
 			ii=2;
 		}else{
-			ii=1;
+			if(ret==0){
+				read();
+				play();
+			}else{
+				ii=1;
+			}
 		}
 		calljava(ii);
 	}else{
-		packet->size=0;
+		read();
 		play();
 	}
 }
-void Java_ffmpeg_audio_audio_init(JNIEnv *env,jobject clz){
+void logg(void *a,int b,const char *c,va_list d){
+	switch(b){
+		case AV_LOG_INFO:
+			VLOGI(c,d);
+			break;
+		case AV_LOG_DEBUG:
+			VLOGD(c,d);
+			break;
+		case AV_LOG_WARNING:
+			VLOGW(c,d);
+			break;
+		case AV_LOG_ERROR:
+			VLOGE(c,d);
+			break;
+	}
+}
+void init(JNIEnv *env,jobject clz){
 	LOGI("%s","init");
 	init1(env,clz);
 	createEngine();
 	av_register_all();
 	set_play_callback(play);
+	av_log_set_callback(logg);
 }
-void Java_ffmpeg_audio_audio_release(JNIEnv *env,jclass clz){
+void release(JNIEnv *env,jclass clz){
 	if(i==0)
 		return;
+	LOGI("%s","release");
 	pause=1;
 	usleep(10000);
 	swr_free(&au_convert_ctx);
@@ -76,12 +103,12 @@ void Java_ffmpeg_audio_audio_release(JNIEnv *env,jclass clz){
     avformat_close_input(&pFormatCtx); 
     i=0;
 }
-void Java_ffmpeg_audio_audio_play(JNIEnv *env,jclass clz){
+void play1(JNIEnv *env,jclass clz){
 	LOGI("%s","play");
 	pause=0;
 	play();
 }   
-void Java_ffmpeg_audio_audio_pause(JNIEnv *env,jclass clz){
+void pause1(JNIEnv *env,jclass clz){
 	LOGI("%s","pause");
 	pause=1;
 }
@@ -105,9 +132,10 @@ void init_swr(){
 }
 char info[50];
 uint64_t duration;
-jint Java_ffmpeg_audio_audio_setData(JNIEnv *env,jclass clz,jstring name){
+jint setData(JNIEnv *env,jclass clz,jstring name){
 	pause=1;
 	i=0;
+	tni=0;
 	LOGI("%s","setData");
 	const char *file=(*env)->GetStringUTFChars(env,name,0);
 	if(avformat_open_input(&pFormatCtx,file,NULL,NULL)!=0)return -1;
@@ -118,6 +146,7 @@ jint Java_ffmpeg_audio_audio_setData(JNIEnv *env,jclass clz,jstring name){
 	audioIndex=av_find_best_stream(pFormatCtx, AVMEDIA_TYPE_AUDIO, -1, -1, &pCodec, 0);
 	if(audioIndex<0)return -3;
 	pCodecCtx = pFormatCtx->streams[audioIndex]->codec;
+	av_log(NULL,AV_LOG_INFO,"解码器:%s",pCodec->name);
 	ran= pFormatCtx->streams[audioIndex]->time_base;
 	duration = pFormatCtx->streams[audioIndex]->duration;
 	if(avcodec_open2(pCodecCtx,pCodec,NULL)<0)return -4;
@@ -125,32 +154,27 @@ jint Java_ffmpeg_audio_audio_setData(JNIEnv *env,jclass clz,jstring name){
 	if(pFrame==NULL)return -5;
 	packet = (AVPacket *)av_malloc(sizeof(AVPacket));
 	av_init_packet(packet);
-	ret=av_read_frame(pFormatCtx,packet);
-	if(av_sample_fmt_is_planar(pCodecCtx->sample_fmt)){
-		init_swr();
-		i=1;
-	}else{
-		i=2;
-		createBufferQueueAudioPlayer(pCodecCtx->channels,pCodecCtx->sample_rate);
-	}
+	av_read_frame(pFormatCtx,packet);
+	init_swr();
+	i=1;
 	(*env)->ReleaseStringUTFChars(env,name,file);
 	return 0;
 }
-jboolean Java_ffmpeg_audio_audio_isPlaying(JNIEnv *env,jclass clz)
+jboolean isPlaying(JNIEnv *env,jclass clz)
 {
 	return pause==0?JNI_FALSE:JNI_TRUE;
 }
-jboolean Java_ffmpeg_audio_audio_isinit(JNIEnv *env,jclass clz)
+jboolean isinit(JNIEnv *env,jclass clz)
 {
 	return i==0?JNI_FALSE:JNI_TRUE;
 }
 
-jlong Java_ffmpeg_audio_audio_getcur(JNIEnv *env,jclass clz)
+jlong getcur(JNIEnv *env,jclass clz)
 {
 	uint64_t t=packet->pts*av_q2d(ran);
 	return t;
 }
-jlong Java_ffmpeg_audio_audio_gettotal(JNIEnv *env,jclass clz)
+jlong gettotal(JNIEnv *env,jclass clz)
 {
 	uint64_t t=duration*av_q2d(ran);
 	return t;
@@ -159,7 +183,7 @@ char info1[1000];
 static void loggg(void *a,int b,const char *c,va_list d){
 	vsprintf(info1,c,d);
 }
-jstring Java_ffmpeg_audio_audio_getinfo(JNIEnv *env,jclass clz,jstring name){
+jstring getinfo(JNIEnv *env,jclass clz,jstring name){
 	LOGI("%s","getinfo");
 	AVFormatContext *format;
 	//AVCodecContext *codec;
@@ -178,4 +202,19 @@ jstring Java_ffmpeg_audio_audio_getinfo(JNIEnv *env,jclass clz,jstring name){
 	(*env)->ReleaseStringUTFChars(env,name,file);
 end:
 	return 	(*env)->NewStringUTF(env,info1);
+}
+static JNINativeMethod methods[] = {
+	{ "init", "()V", (void*)init },
+	{ "release", "()V", (void*)release },
+	{ "play", "()V", (void*)play1},
+	{ "pause", "()V", (void*)pause1 },
+	{ "setData", "(Ljava/lang/String;)I", (void*)setData },
+	{ "isPlaying", "()Z", (void*)isPlaying},
+	//{ "isinit", "()Z", (void*) isinit},
+	{ "getcur", "()J", (void*)getcur},
+	{ "gettotal", "()J", (void*)gettotal },
+	{ "getinfo", "(Ljava/lang/String;)Ljava/lang/String;", (void*)getinfo},
+};
+int register_audio(JNIEnv *env) {
+	return jniRegisterNativeMethods(env, "ffmpeg/audio/audio", methods, sizeof(methods) / sizeof(methods[0]));
 }
