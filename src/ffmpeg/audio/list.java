@@ -173,6 +173,7 @@ public class list extends Activity implements Runnable,AdapterView.OnItemClickLi
 		".aac",
 		".wav",
 		".wma",
+		".ogg",
 	};
 
 	@Override

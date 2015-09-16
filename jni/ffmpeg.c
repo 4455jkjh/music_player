@@ -32,40 +32,41 @@ AVRational ran;
 int tni;
 int ret1;
 void read(){
-	av_free_packet(packet);
-	av_read_frame(pFormatCtx,packet);
-	LOGI("ret:%d",ret);
+	if(packet->size==0){
+		av_free_packet(packet);
+		ret=av_read_frame(pFormatCtx,packet);
+	}
 }
 void play(){
 	if(pause==1){
 		return;
 	}
-	if(packet->size==0){
-		read();
+	read();
+	if(ret!=0){
+		calljava(1);
+		return;
 	}
 	if(packet->stream_index==audioIndex){
 		ret1=avcodec_decode_audio4(pCodecCtx,pFrame,&finish,packet);
+		packet->size-=ret1;
 		if(finish){
     		r=swr_convert(au_convert_ctx,&out_buffer, MAX_AUDIO_FRAME_SIZE,(const uint8_t **)pFrame->data , pFrame->nb_samples);
     		out_buffer_size=av_samples_get_buffer_size(NULL,out_channels ,r,out_sample_fmt, 1);
 			AudioWrite(out_buffer,out_buffer_size);
 			//av_log(NULL,AV_LOG_INFO,"tni:%d packet size:%6d ret:%6d",tni,packet->size,ret);
-			tni++;
-			packet->size-=ret1;
-			ii=2;
 		}else{
 			if(ret==0){
 				read();
 				play();
-			}else{
-				ii=1;
 			}
 		}
-		calljava(ii);
+		calljava(2);
 	}else{
+		packet->size=0;
 		read();
 		play();
 	}
+
 }
 void logg(void *a,int b,const char *c,va_list d){
 	switch(b){
@@ -154,7 +155,7 @@ jint setData(JNIEnv *env,jclass clz,jstring name){
 	if(pFrame==NULL)return -5;
 	packet = (AVPacket *)av_malloc(sizeof(AVPacket));
 	av_init_packet(packet);
-	av_read_frame(pFormatCtx,packet);
+	ret=av_read_frame(pFormatCtx,packet);
 	init_swr();
 	i=1;
 	(*env)->ReleaseStringUTFChars(env,name,file);
@@ -198,7 +199,7 @@ jstring getinfo(JNIEnv *env,jclass clz,jstring name){
 	for(i=0;i<format->nb_streams;i++){
 		
 	}
-	    avformat_close_input(&format); 
+	   avformat_close_input(&format); 
 	(*env)->ReleaseStringUTFChars(env,name,file);
 end:
 	return 	(*env)->NewStringUTF(env,info1);

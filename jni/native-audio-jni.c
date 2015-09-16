@@ -25,9 +25,6 @@
 #include <jni.h>
 #include <string.h>
 
-// for __android_log_print(ANDROID_LOG_INFO, "YourApp", "formatted message");
-// #include <android/log.h>
-
 // for native audio
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
@@ -36,7 +33,6 @@
 #include <sys/types.h>
 #include <android/asset_manager.h>
 #include "native-audio-jni.h"
-//#include 
 // engine interfaces
 static SLObjectItf engineObject = NULL;
 static SLEngineItf engineEngine;
@@ -86,10 +82,7 @@ void bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context)
     play_callback();
 }
 void AudioWrite(void *data,int size){
-    SLresult result;
-    result = (*bqPlayerBufferQueue)->Enqueue(bqPlayerBufferQueue, data, size);
-    assert(SL_RESULT_SUCCESS == result);
-    (void)result;
+    (*bqPlayerBufferQueue)->Enqueue(bqPlayerBufferQueue, data, size);
 }
 // create the engine and output mix objects
 void createEngine()
