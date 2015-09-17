@@ -28,23 +28,25 @@ import java.util.Locale;
 import android.app.AlertDialog;
 import android.widget.Button;
 
-public class list extends Activity implements Runnable,AdapterView.OnItemClickListener
+public class list extends Activity implements AdapterView.OnItemClickListener,play.OnProgressChangedListener
 {
 	List<File> lf;
 	Compare compare;
 	Adapter adapter;
 	Intent intent;
 	File cur,i;
-	handler h;
 	ListView listview;
 	TextView curtime,totaltime;
 	SeekBar seek;
 	audio a;
 	int index=0;
+	con c;
+	play p;
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		if(Build.VERSION.SDK_INT>=21){
+		if (Build.VERSION.SDK_INT >= 21)
+		{
 			setTitleColor(0xffffffff);
 		}
 		// TODO: Implement this method
@@ -108,15 +110,16 @@ public class list extends Activity implements Runnable,AdapterView.OnItemClickLi
 		adapter = new Adapter();
 		listview.setAdapter(adapter);
 		i = new File("/sdcard/kgmusic");
-		intent = new Intent(this, MainActivity.class);
-		h = new handler();
-		a = new audio(h);
-		new Thread(this).start();
+		intent = new Intent(this, play.class);
+		c=new con(this);
+		bindService(intent,c,BIND_AUTO_CREATE);
 	}
-	public void run()
-	{
+	public void set(audio a1,play p1){
+		a=a1;
+		p=p1;
+		p.setOnProgressChangedListener(this);
+		index = 0;
 		update(i);
-		h.sendEmptyMessage(0);
 	}
 	public void click(View v)
 	{
@@ -173,7 +176,6 @@ public class list extends Activity implements Runnable,AdapterView.OnItemClickLi
 		".aac",
 		".wav",
 		".wma",
-		".ogg",
 	};
 
 	@Override
@@ -184,7 +186,8 @@ public class list extends Activity implements Runnable,AdapterView.OnItemClickLi
 		index = p3;
 		play();
 	}
-	private void play(File f){
+	private void play(File f)
+	{
 		a.release();
 		a.setData(f.getAbsolutePath());
 		totaltime.setText(gettime(a.gettotal()));
@@ -201,6 +204,15 @@ public class list extends Activity implements Runnable,AdapterView.OnItemClickLi
 		seek.setMax((int)a.gettotal());
 		a.play();
 		setTitle(f.getName());
+	}
+
+	@Override
+	protected void onResume()
+	{
+		// TODO: Implement this method
+		super.onResume();
+		if (index != 0)
+			setTitle(lf.get(index).getName());
 	}
 
 	@Override
@@ -257,30 +269,37 @@ public class list extends Activity implements Runnable,AdapterView.OnItemClickLi
 		{
 			// TODO: Implement this method
 			File f=lf.get(p1);
-			click c=new click(f);
+			click c=new click(p1);
 			p2 = getLayoutInflater().inflate(R.layout.adapter, p3, false);
 			TextView tv=(TextView)p2.findViewById(R.id.name);
 			tv.setText(f.getName());
 			tv.setOnClickListener(c);
 			((Button)p2.findViewById(R.id.info)).setOnClickListener(c);
 			/*size = (TextView)p2.findViewById(R.id.size);
-			size.setText(size(f.length(), 0));*/
+			 size.setText(size(f.length(), 0));*/
 			return p2;
 		}
 	}
 	class click implements View.OnClickListener
 	{
 		File s;
-		public click(File s){
-			this.s=s;
+		int p;
+		public click(int p1)
+		{
+			this.s = lf.get(p1);
+			p=p1;
 		}
 		@Override
 		public void onClick(View p1)
 		{
 			// TODO: Implement this method
-			if(p1 instanceof Button){
+			if (p1 instanceof Button)
+			{
 				showinfo(s);
-			}else if(p1 instanceof TextView){
+			}
+			else if (p1 instanceof TextView)
+			{
+				index=p;
 				play(s);
 			}
 		}
@@ -292,10 +311,11 @@ public class list extends Activity implements Runnable,AdapterView.OnItemClickLi
 		"GB",
 		"TB",
 	};
-	public void showinfo(File s){
+	public void showinfo(File s)
+	{
 		AlertDialog.Builder ab=new AlertDialog.Builder(this);
 		ab.setTitle(s.getName())
-		.setMessage(s.getAbsolutePath());
+			.setMessage(s.getAbsolutePath());
 		ab.create().show();
 	}
 	private String size(double a, int b)
@@ -307,29 +327,26 @@ public class list extends Activity implements Runnable,AdapterView.OnItemClickLi
 		b++;
 		return size(a / 1024, b);
 	}
-	class handler extends Handler
+	public void OnProgressChanged(int msg)
 	{
-
-		@Override
-		public void handleMessage(Message msg)
+		// TODO: Implement this method
+		switch (msg)
 		{
-			// TODO: Implement this method
-			super.handleMessage(msg);
-			if (msg.what == 0)
+			case 0:
 				adapter.notifyDataSetChanged();
-			else if (msg.what == 1)
-			{
+				listview.setSelection(index);
+				setTitle(lf.get(index).getName());
+				break;
+			case 1:
 				index++;
 				if (index == lf.size())return;
 				play();
-			}
-			else if (msg.what == 2)
-			{
+				break;
+			case 2:
 				curtime.setText(gettime(a.getcur()));
 				seek.setProgress((int)a.getcur());
-			}
+				break;
 		}
-
 	}
 	public static String gettime(long i)
 	{

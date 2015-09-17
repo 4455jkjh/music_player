@@ -204,6 +204,13 @@ jstring getinfo(JNIEnv *env,jclass clz,jstring name){
 end:
 	return 	(*env)->NewStringUTF(env,info1);
 }
+int curindex=0;
+void putindex(JNIEnv *e,jobject o,jint tnij){
+	curindex=tnij;
+}
+jint getindex(JNIEnv *e,jobject o){
+	return curindex;
+}
 static JNINativeMethod methods[] = {
 	{ "init", "()V", (void*)init },
 	{ "release", "()V", (void*)release },
@@ -215,6 +222,8 @@ static JNINativeMethod methods[] = {
 	{ "getcur", "()J", (void*)getcur},
 	{ "gettotal", "()J", (void*)gettotal },
 	{ "getinfo", "(Ljava/lang/String;)Ljava/lang/String;", (void*)getinfo},
+	//{"getindex","()I",(void*)getindex},
+	//{"putindex","(I)V",(void*)putindex},
 };
 int register_audio(JNIEnv *env) {
 	return jniRegisterNativeMethods(env, "ffmpeg/audio/audio", methods, sizeof(methods) / sizeof(methods[0]));
