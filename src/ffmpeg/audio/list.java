@@ -314,8 +314,8 @@ public class list extends Activity implements AdapterView.OnItemClickListener,pl
 	public void showinfo(File s)
 	{
 		AlertDialog.Builder ab=new AlertDialog.Builder(this);
-		ab.setTitle(s.getName())
-			.setMessage(s.getAbsolutePath());
+		ab.setTitle("文件信息")
+			.setMessage(a.getinfo(s.getAbsolutePath()));
 		ab.create().show();
 	}
 	private String size(double a, int b)

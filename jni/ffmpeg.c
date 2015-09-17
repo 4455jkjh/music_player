@@ -12,9 +12,9 @@
 #define VLOGW(a,b) ((void)__android_log_vprint(ANDROID_LOG_WARN, "ffmpegaudio", a,b)) 
 #define VLOGE(a,b) ((void)__android_log_vprint(ANDROID_LOG_ERROR, "ffmpegaudio", a,b)) 
 #define LOGI(...) ((void)__android_log_print(ANDROID_LOG_INFO, "ffmpegaudio", __VA_ARGS__)) 
-AVFormatContext *pFormatCtx;
-AVCodecContext *pCodecCtx;
-AVCodec *pCodec;
+AVFormatContext *pFormatCtx,*format;
+AVCodecContext *pCodecCtx,*codec;
+AVCodec *pCodec,*dec;
 AVPacket *packet;
 AVFrame *pFrame;
 SwrContext *au_convert_ctx;
@@ -181,25 +181,41 @@ jlong gettotal(JNIEnv *env,jclass clz)
 	return t;
 }
 char info1[1000];
-static void loggg(void *a,int b,const char *c,va_list d){
-	vsprintf(info1,c,d);
-}
+int lenth,d,m,s;
 jstring getinfo(JNIEnv *env,jclass clz,jstring name){
 	LOGI("%s","getinfo");
-	AVFormatContext *format;
 	//AVCodecContext *codec;
-	av_log_set_callback(loggg);
+	AVDictionaryEntry *m = NULL;
 	const char *file=(*env)->GetStringUTFChars(env,name,0);
 	if(avformat_open_input(&format,file,NULL,NULL)!=0)
 		goto end;
 	if(avformat_find_stream_info(format,NULL)<0)
 		goto end;
-	av_dump_format(pFormatCtx,-1,file,0);
-	int i;
-	for(i=0;i<format->nb_streams;i++){
-		
-	}
-	   avformat_close_input(&format); 
+	int a=av_find_best_stream(format, AVMEDIA_TYPE_AUDIO, -1, -1, &dec, 0);
+	codec = format->streams[a]->codec;
+	AVRational rr= format->streams[a]->time_base;
+	d= (format->streams[a]->duration)*av_q2d(rr);
+	m=(d%3600)/60;
+	s=d%60;
+	/*char metadata[200];
+while(m=av_dict_get(format->metadata,"",m,AV_DICT_IGNORE_SUFFIX)){  
+    sprintf(metadata,"%s:%s\n",m->key,m->value) ;
+}*/
+	snprintf(info1,sizeof(info1),
+	"文件名: %s\n"
+	"时长%: %d:%02d\n"
+	"解码器: %s\n"
+	"声道数: %d\n"
+	"采样率: %dHz\n"
+	"比特率: %dKbps",
+	format->filename,
+	m,s,
+	dec->name,
+	codec->channels,
+	codec->sample_rate,
+	codec->bit_rate/1000);
+	avcodec_close(codec);
+	avformat_close_input(&format); 
 	(*env)->ReleaseStringUTFChars(env,name,file);
 end:
 	return 	(*env)->NewStringUTF(env,info1);
