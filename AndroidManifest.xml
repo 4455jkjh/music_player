@@ -3,6 +3,7 @@
       package="ffmpeg.audio"
       android:versionCode="11"
       android:versionName="1.0">
+	<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-sdk
 		android:minSdkVersion="9" 
@@ -31,5 +32,7 @@
                 <data android:mimeType="audio/*"/>
             </intent-filter>
 		</activity>
+		<service 
+			android:name=".play"/>
     </application>
 </manifest> 
