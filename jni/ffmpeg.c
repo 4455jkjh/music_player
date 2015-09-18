@@ -203,7 +203,7 @@ while(m=av_dict_get(format->metadata,"",m,AV_DICT_IGNORE_SUFFIX)){
 }*/
 	snprintf(info1,sizeof(info1),
 	"文件名: %s\n"
-	"时长%: %d:%02d\n"
+	"时长: %d:%02d\n"
 	"解码器: %s\n"
 	"声道数: %d\n"
 	"采样率: %dHz\n"
