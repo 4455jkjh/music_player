@@ -1,0 +1,32 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <item
+        android:title="排序方式">
+		<menu>
+			<item
+				android:id="@+id/name"
+				android:title="文件名"/>
+			<item
+				android:id="@+id/type"
+				android:title="类型"/>
+			<item
+				android:id="@+id/time"
+				android:title="时间"/>
+			<item
+				android:id="@+id/size"
+				android:title="大小"/>
+			<item
+				android:id="@+id/namedao"
+				android:title="文件名(降序)"/>
+			<item
+				android:id="@+id/timedao"
+				android:title="时间(降序)"/>
+			<item
+				android:id="@+id/typedao"
+				android:title="类型(降序)"/>
+			<item
+				android:id="@+id/sizedao"
+				android:title="大小(降序)"/>
+		</menu>
+    </item>
+</menu>

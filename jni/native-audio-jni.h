@@ -5,3 +5,4 @@ void createEngine();
 void createBufferQueueAudioPlayer(int,int);
 void set_play_callback(void (*callback)());
 void AudioWrite(void *data,int size);
+#define NDEBUG

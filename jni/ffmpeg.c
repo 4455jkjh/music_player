@@ -5,6 +5,7 @@
 #include "libavutil/avutil.h"
 #include "libswresample/swresample.h"
 #include "onload.h"
+#include <assert.h>
 #define MAX_AUDIO_FRAME_SIZE 192000 // 1 second of 48khz 32bit audio
 #define 	out_sample_fmt AV_SAMPLE_FMT_S16
 #define VLOGI(a,b) ((void)__android_log_vprint(ANDROID_LOG_INFO, "ffmpegaudio", a,b)) 
@@ -187,11 +188,12 @@ jstring getinfo(JNIEnv *env,jclass clz,jstring name){
 	//AVCodecContext *codec;
 	AVDictionaryEntry *m = NULL;
 	const char *file=(*env)->GetStringUTFChars(env,name,0);
-	if(avformat_open_input(&format,file,NULL,NULL)!=0)
-		goto end;
-	if(avformat_find_stream_info(format,NULL)<0)
-		goto end;
-	int a=av_find_best_stream(format, AVMEDIA_TYPE_AUDIO, -1, -1, &dec, 0);
+	int a;
+	a=avformat_open_input(&format,file,NULL,NULL);
+	assert(a==0);
+	a=avformat_find_stream_info(format,NULL);
+	assert(a>=0);
+	a=av_find_best_stream(format, AVMEDIA_TYPE_AUDIO, -1, -1, &dec, 0);
 	codec = format->streams[a]->codec;
 	AVRational rr= format->streams[a]->time_base;
 	d= (format->streams[a]->duration)*av_q2d(rr);

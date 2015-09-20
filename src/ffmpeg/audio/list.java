@@ -27,6 +27,8 @@ import java.text.Collator;
 import java.util.Locale;
 import android.app.AlertDialog;
 import android.widget.Button;
+import android.view.Menu;
+import android.view.MenuItem;
 
 public class list extends Activity implements AdapterView.OnItemClickListener,play.OnProgressChangedListener
 {
@@ -49,6 +51,7 @@ public class list extends Activity implements AdapterView.OnItemClickListener,pl
 		{
 			setTitleColor(0xffffffff);
 		}
+		assert 1==2;
 		// TODO: Implement this method
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.list);
@@ -148,6 +151,55 @@ public class list extends Activity implements AdapterView.OnItemClickListener,pl
 					index = lf.size() - 1;
 				play();
 		}
+	}
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
+		// TODO: Implement this method
+		getMenuInflater().inflate(R.menu.main,menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
+		// TODO: Implement this method
+		switch(item.getItemId()){
+			case R.id.name:
+				compare.setmrthod(Compare.method.name);
+				compare.setdao(false);
+				break;
+			case R.id.time:
+				compare.setmrthod(Compare.method.time);
+				compare.setdao(false);
+				break;
+			case R.id.type:
+				compare.setmrthod(Compare.method.type);
+				compare.setdao(false);
+				break;
+			case R.id.size:
+				compare.setmrthod(Compare.method.size);
+				compare.setdao(false);
+				break;
+			case R.id.namedao:
+				compare.setmrthod(Compare.method.name);
+				compare.setdao(true);
+				break;
+			case R.id.timedao:
+				compare.setmrthod(Compare.method.time);
+				compare.setdao(true);
+				break;
+			case R.id.typedao:
+				compare.setmrthod(Compare.method.type);
+				compare.setdao(true);
+				break;
+			case R.id.sizedao:
+				compare.setmrthod(Compare.method.size);
+				compare.setdao(true);
+				break;
+		}
+		Collections.sort(lf, compare);
+		adapter.notifyDataSetChanged();
+		return true;
 	}
 	private void update(File ff)
 	{

@@ -20,7 +20,7 @@
  *
  *   src/com/example/nativeaudio/NativeAudio/NativeAudio.java
  */
-
+#include "native-audio-jni.h"
 #include <assert.h>
 #include <jni.h>
 #include <string.h>
@@ -32,7 +32,7 @@
 // for native asset manager
 #include <sys/types.h>
 #include <android/asset_manager.h>
-#include "native-audio-jni.h"
+
 // engine interfaces
 static SLObjectItf engineObject = NULL;
 static SLEngineItf engineEngine;
