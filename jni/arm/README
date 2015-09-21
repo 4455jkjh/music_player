@@ -1,2 +1,3 @@
 此文件夹中包含分散的库(libavcodec.so,libavutil.so,libavformat.so,libswresample.so,libavdevice.so,libavfilter.so,libswscale.so)，和一个连接起来的库(libffmpeg.so)。
 请根据自己的喜好选择。
+
