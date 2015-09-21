@@ -182,7 +182,7 @@ jlong gettotal(JNIEnv *env,jclass clz)
 	return t;
 }
 char info1[1000];
-int lenth,d,m,s;
+int lenth,d,mm,s;
 jstring getinfo(JNIEnv *env,jclass clz,jstring name){
 	LOGI("%s","getinfo");
 	//AVCodecContext *codec;
@@ -197,7 +197,8 @@ jstring getinfo(JNIEnv *env,jclass clz,jstring name){
 	codec = format->streams[a]->codec;
 	AVRational rr= format->streams[a]->time_base;
 	d= (format->streams[a]->duration)*av_q2d(rr);
-	m=(d%3600)/60;
+	mm=d%3600;
+	mm=mm/60;
 	s=d%60;
 	/*char metadata[200];
 while(m=av_dict_get(format->metadata,"",m,AV_DICT_IGNORE_SUFFIX)){  
@@ -211,11 +212,10 @@ while(m=av_dict_get(format->metadata,"",m,AV_DICT_IGNORE_SUFFIX)){
 	"采样率: %dHz\n"
 	"比特率: %dKbps",
 	format->filename,
-	m,s,
+	mm,s,
 	dec->name,
 	codec->channels,
-	codec->sample_rate,
-	codec->bit_rate/1000);
+	codec->sample_rate,codec->bit_rate/1000);
 	avcodec_close(codec);
 	avformat_close_input(&format); 
 	(*env)->ReleaseStringUTFChars(env,name,file);

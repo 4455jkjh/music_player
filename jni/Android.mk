@@ -20,8 +20,12 @@ LOCAL_MODULE    := audio
 LOCAL_SRC_FILES := native-audio-jni.c ffmpeg.c onload.c
 LOCAL_ARM_MODE := arm
 # for native audio
-LOCAL_LDLIBS    += -lOpenSLES -llog -lffmpeg
-LOCAL_SHARED_LIBRARIES := ffmpeg
+LOCAL_LDLIBS    += -lOpenSLES -llog 
+ifeq ($(TARGET_ARCH) , arm)
+LOCAL_LDLIBS += -lavcodec -lavformat -lavutil -lswresample
+else
+LOCAL_LDLIBS += -lffmpeg
+endif
 include $(BUILD_SHARED_LIBRARY)
 
 
