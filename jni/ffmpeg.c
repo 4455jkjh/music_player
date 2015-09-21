@@ -181,6 +181,28 @@ jlong gettotal(JNIEnv *env,jclass clz)
 	uint64_t t=duration*av_q2d(ran);
 	return t;
 }
+int64_t get_bit_rate(AVCodecContext *ctx)
+{
+    int64_t bit_rate;
+    int bits_per_sample;
+
+    switch (ctx->codec_type) {
+    case AVMEDIA_TYPE_VIDEO:
+    case AVMEDIA_TYPE_DATA:
+    case AVMEDIA_TYPE_SUBTITLE:
+    case AVMEDIA_TYPE_ATTACHMENT:
+        bit_rate = ctx->bit_rate;
+        break;
+    case AVMEDIA_TYPE_AUDIO:
+        bits_per_sample = av_get_bits_per_sample(ctx->codec_id);
+        bit_rate = bits_per_sample ? ctx->sample_rate * ctx->channels * bits_per_sample : ctx->bit_rate;
+        break;
+    default:
+        bit_rate = 0;
+        break;
+    }
+    return bit_rate;
+}
 char info1[1000];
 int lenth,d,mm,s;
 jstring getinfo(JNIEnv *env,jclass clz,jstring name){
@@ -204,6 +226,9 @@ jstring getinfo(JNIEnv *env,jclass clz,jstring name){
 while(m=av_dict_get(format->metadata,"",m,AV_DICT_IGNORE_SUFFIX)){  
     sprintf(metadata,"%s:%s\n",m->key,m->value) ;
 }*/
+	int bit_rate=get_bit_rate(codec);
+	if(bit_rate==0)
+		bit_rate=format->bit_rate;
 	snprintf(info1,sizeof(info1),
 	"文件名: %s\n"
 	"时长: %d:%02d\n"
@@ -215,7 +240,7 @@ while(m=av_dict_get(format->metadata,"",m,AV_DICT_IGNORE_SUFFIX)){
 	mm,s,
 	dec->name,
 	codec->channels,
-	codec->sample_rate,codec->bit_rate/1000);
+	codec->sample_rate,bit_rate/1000);
 	avcodec_close(codec);
 	avformat_close_input(&format); 
 	(*env)->ReleaseStringUTFChars(env,name,file);

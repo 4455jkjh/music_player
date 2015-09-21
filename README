@@ -1,3 +1,4 @@
 一个基于FFMPEG的音乐播放器。
 
 此分支不包含arm和x86的libffmpeg.so，需要自行从主分支中提取。
+ffmpeg为最新的Snapshot,不支持以前的libffmpeg.so
