@@ -22,6 +22,7 @@ LOCAL_ARM_MODE := arm
 # for native audio
 LOCAL_LDLIBS    += -lOpenSLES -llog
 LOCAL_SHARED_LIBRARIES := avcodec avformat avutil swresample
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
 include $(BUILD_SHARED_LIBRARY)
 
 

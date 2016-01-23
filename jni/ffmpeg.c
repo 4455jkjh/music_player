@@ -33,7 +33,7 @@ int tni;
 int ret1;
 void read(){
 	if(packet->size==0){
-		av_free_packet(packet);
+		av_packet_unref(packet);
 		ret=av_read_frame(pFormatCtx,packet);
 	}
 }
