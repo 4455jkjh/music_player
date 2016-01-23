@@ -20,12 +20,9 @@ LOCAL_MODULE    := audio
 LOCAL_SRC_FILES := native-audio-jni.c ffmpeg.c onload.c
 LOCAL_ARM_MODE := arm
 # for native audio
-LOCAL_LDLIBS    += -lOpenSLES -llog -lffmpeg
-LOCAL_SHARED_LIBRARIES := ffmpeg
+LOCAL_LDLIBS    += -lOpenSLES -llog
+LOCAL_SHARED_LIBRARIES := avcodec avformat avutil swresample
 include $(BUILD_SHARED_LIBRARY)
 
 
-#nclude $(CLEAR_VARS)
-#OCAL_MODULE    := ffmpeg
-#OCAL_SRC_FILES := $(TARGET_ARCH)/libffmpeg.so
-#nclude $(PREBUILT_SHARED_LIBRARY)
+include $(LOCAL_PATH)/arm/prebuilt.mk
